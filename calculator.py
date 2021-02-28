@@ -1,96 +1,93 @@
-from tkinter import* 
+from tkinter import *
 
-me=Tk()
-me.geometry("354x460")
-me.title("CALCULATOR")
-melabel = Label(me,text="CALCULATOR",bg='White',font=("Times",30,'bold'))
-melabel.pack(side=TOP)
-me.config(background='Dark gray')
+class Calculator:
+    def __init__(self, master):
+        self.master = master
+        master.title("Python Calculator")
 
-textin=StringVar()
-operator=""
+        # create screen widget
+        self.screen = Text(master, state='disabled', width=30, height=3,background="yellow", foreground="blue")
 
-def clickbut(number):
-     global operator
-     operator=operator+str(number)
-     textin.set(operator)
-     
-def equlbut():
-     global operator
-     add=str(eval(operator))
-     textin.set(add)
-     operator=''
-def equlbut():
-     global operator
-     sub=str(eval(operator))
-     textin.set(sub)
-     operator=''
-def equlbut():
-     global operator
-     mul=str(eval(operator))
-     textin.set(mul)
-     operator=''
-def equlbut():
-     global operator
-     div=str(eval(operator))
-     textin.set(div)
-     operator=''
-     
-def clrbut():
-     textin.set('')
-     
-     
-metext=Entry(me,font=("Courier New",12,'bold'),textvar=textin,width=25,bd=5,bg='powder blue')
-metext.pack()
+        # position screen in window
+        self.screen.grid(row=0,column=0,columnspan=4,padx=5,pady=5)
+        self.screen.configure(state='normal')
 
-but1=Button(me,padx=14,pady=14,bd=4,bg='white',command=lambda:clickbut(1),text="1",font=("Courier New",16,'bold'))
-but1.place(x=10,y=100)
+        # initialize screen value as empty
+        self.equation = ''
 
-but2=Button(me,padx=14,pady=14,bd=4,bg='white',command=lambda:clickbut(2),text="2",font=("Courier New",16,'bold'))
-but2.place(x=10,y=170)
+        # create buttons using method createButton
+        b1 =  self.createButton(7)
+        b2 = self.createButton(8)
+        b3 = self.createButton(9)
+        b4 = self.createButton(u"\u232B",None)
+        b5 = self.createButton(4)
+        b6 = self.createButton(5)
+        b7 = self.createButton(6)
+        b8 = self.createButton(u"\u00F7")
+        b9 = self.createButton(1)
+        b10 = self.createButton(2)
+        b11 = self.createButton(3)
+        b12 = self.createButton('*')
+        b13 = self.createButton('.')
+        b14 = self.createButton(0)
+        b15 = self.createButton('+')
+        b16 = self.createButton('-')
+        b17 = self.createButton('=',None,34)
 
-but3=Button(me,padx=14,pady=14,bd=4,bg='white',command=lambda:clickbut(3),text="3",font=("Courier New",16,'bold'))
-but3.place(x=10,y=240)
+        # buttons stored in list
+        buttons = [b1,b2,b3,b4,b5,b6,b7,b8,b9,b10,b11,b12,b13,b14,b15,b16,b17]
 
-but4=Button(me,padx=14,pady=14,bd=4,bg='white',command=lambda:clickbut(4),text="4",font=("Courier New",16,'bold'))
-but4.place(x=75,y=100)
+        # intialize counter
+        count = 0
+        # arrange buttons with grid manager
+        for row in range(1,5):
+            for column in range(4):
+                buttons[count].grid(row=row,column=column)
+                count += 1
+        # arrange last button '=' at the bottom
+        buttons[16].grid(row=5,column=0,columnspan=4)
 
-but5=Button(me,padx=14,pady=14,bd=4,bg='white',command=lambda:clickbut(5),text="5",font=("Courier New",16,'bold'))
-but5.place(x=75,y=170)
+    def createButton(self,val,write=True,width=7):
+        # this function creates a button, and takes one compulsory argument, the value that should be on the button
 
-but6=Button(me,padx=14,pady=14,bd=4,bg='white',command=lambda:clickbut(6),text="6",font=("Courier New",16,'bold'))
-but6.place(x=75,y=240)
+        return Button(self.master, text=val,command = lambda: self.click(val,write), width=width)
 
-but7=Button(me,padx=14,pady=14,bd=4,bg='white',command=lambda:clickbut(7),text="7",font=("Courier New",16,'bold'))
-but7.place(x=140,y=100)
+    def click(self,text,write):
+        # this function handles what happens when you click a button
+        # 'write' argument if True means the value 'val' should be written on screen, if None, should not be written on screen
+        if write == None:
 
-but8=Button(me,padx=14,pady=14,bd=4,bg='white',command=lambda:clickbut(8),text="8",font=("Courier New",16,'bold'))
-but8.place(x=140,y=170)
+            #only evaluate code when there is an equation to be evaluated
+            if text == '=' and self.equation: 
+                # replace the unicode value of division ./.with python division symbol / using regex
+                self.equation= re.sub(u"\u00F7", '/', self.equation)
+                print(self.equation)
+                answer = str(eval(self.equation))
+                self.clear_screen()
+                self.insert_screen(answer,newline=True)
+            elif text == u"\u232B":
+                self.clear_screen()
+            
+            
+        else:
+            # add text to screen
+            self.insert_screen(text)
+        
 
-but9=Button(me,padx=14,pady=14,bd=4,bg='white',command=lambda:clickbut(9),text="9",font=("Courier New",16,'bold'))
-but9.place(x=140,y=240)
+    def clear_screen(self):
+        #to clear screen
+        #set equation to empty before deleting screen
+        self.equation = ''
+        self.screen.configure(state='normal')
+        self.screen.delete('1.0', END)
 
-but0=Button(me,padx=14,pady=14,bd=4,bg='white',command=lambda:clickbut(0),text="0",font=("Courier New",16,'bold'))
-but0.place(x=10,y=310)
+    def insert_screen(self, value,newline=False):
+        self.screen.configure(state='normal')
+        self.screen.insert(END,value)
+        # record every value inserted in screen
+        self.equation += str(value)
+        self.screen.configure(state ='disabled')
 
-butdot=Button(me,padx=47,pady=14,bd=4,bg='white',command=lambda:clickbut("."),text=".",font=("Courier New",16,'bold'))
-butdot.place(x=75,y=310)
-
-butpl=Button(me,padx=14,pady=14,bd=4,bg='white',text="+",command=lambda:clickbut("+"),text=".",font=("Courier New",16,'bold'))
-butpl.place(x=205,y=100)
-
-butsub=Button(me,padx=14,pady=14,bd=4,bg='white',text="-",command=lambda:clickbut("-"),text=".",font=("Courier New",16,'bold'))
-butsub.place(x=205,y=170)
-
-butml=Button(me,padx=14,pady=14,bd=4,bg='white',text="*",command=lambda:clickbut("*"),text=".",font=("Courier New",16,'bold'))
-butml.place(x=205,y=240)
-
-butdiv=Button(me,padx=14,pady=14,bd=4,bg='white',text="/",command=lambda:clickbut("/"),text=".",font=("Courier New",16,'bold'))
-butdiv.place(x=205,y=310)
-
-butclear=Button(me,padx=14,pady=119,bd=4,bg='white',text="CE",command=clrbut,font=("Courier New",16,'bold'))
-butclear.place(x=270,y=100)
-
-butequal=Button(me,padx=151,pady=14,bd=4,bg='white',command=equlbut,text="=",font=("Courier New",16,'bold'))
-butequal.place(x=10,y=380)
-me.mainloop()
+root = Tk()
+my_gui = Calculator(root)
+root.mainloop()
